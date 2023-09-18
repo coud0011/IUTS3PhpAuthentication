@@ -6,11 +6,24 @@ namespace Authentication;
 
 use Authentication\Exception\AuthenticationException;
 use Entity\User;
+use Service\Exception\SessionException;
+use Service\Session;
 
 class UserAuthentication
 {
     private const LOGIN_INPUT_NAME = 'login';
     private const PASSWORD_INPUT_NAME = 'password';
+    private const SESSION_KEY = '__UserAuthentication__';
+    private const SESSION_USER_KEY = 'user';
+    private ?User $user = null;
+
+    /**
+     * @throws SessionException
+     */
+    public function __construct()
+    {
+        Session::start();
+    }
 
     public function loginForm(string $action, string $submitText = 'OK'): string
     {
@@ -43,9 +56,17 @@ HTML
     public function getUserFromAuth(): User
     {
         if(isset($_POST['user_login'])&&isset($_POST['user_password'])) {
-            return User::findByCredentials($_POST['user_login'], $_POST['user_password']);
+            $this->setUser(User::findByCredentials($_POST['user_login'], $_POST['user_password']));
+            return $this->user;
         } else {
             throw new AuthenticationException("loginForm: User not found");
         }
+    }
+
+
+    public function setUser(User $user):void
+    {
+        $this->user=$user;
+        $_SESSION[self::SESSION_KEY][self::SESSION_USER_KEY]=$user;
     }
 }
