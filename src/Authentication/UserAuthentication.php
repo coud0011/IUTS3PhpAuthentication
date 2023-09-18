@@ -64,7 +64,7 @@ HTML
     }
 
 
-    public function setUser(User $user):void
+    protected function setUser(User $user):void
     {
         $this->user=$user;
         $_SESSION[self::SESSION_KEY][self::SESSION_USER_KEY]=$user;
